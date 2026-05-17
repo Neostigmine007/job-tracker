@@ -1,0 +1,30 @@
+name: Job Monitor
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # This tells GitHub to run the tracker every 30 minutes
+  workflow_dispatch: # This keeps the button that lets you run it manually
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/actions-setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Run Tracker Script
+      run: python tracker.py
+
+    - name: Save Changes
+      if: always()
+      run: |
+        git config --global user.name 'JobBot'
+        git config --global user.email 'bot@://github.com'
+        git add last_seen.txt
+        git commit -m "Update page history" || exit 0
+        git push
